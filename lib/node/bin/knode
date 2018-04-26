@@ -1,0 +1,51 @@
+#!/usr/bin/env node
+
+const path = require('path');
+const shell = require('shelljs');
+const argv = require('yargs').argv;
+
+const command = argv._[0];
+
+const cfg = require(path.resolve(process.cwd(), 'package.json'));
+const entryPoint = (cfg.hokku && cfg.hokku.server && cfg.hokku.server.main) || cfg.main;
+
+const startUIFlag = cfg.hokku && cfg.hokku.web && cfg.hokku.web.main;
+
+const nodemon = './node_modules/nodemon/bin/nodemon.js';
+const babelNode = './node_modules/babel-cli/bin/babel-node.js';
+const babelPlugins = 'transform-es2015-modules-commonjs,' +
+    'transform-decorators-legacy,' +
+    'transform-class-properties,' +
+    'transform-object-rest-spread';
+
+function devCmd() {
+    const startNodeCmd = `node ${nodemon} --delay 3 --inspect ${babelNode} --plugins ${babelPlugins} ./${entryPoint}`;
+
+    shell.exec(startNodeCmd, (code, stdout, stderr) => {
+        console.log('NodeCmd Exit code:', code);
+    });
+
+    if (startUIFlag) {
+        const startUICmd = 'node ./node_modules/hokku-web/bin/kweb dev';
+
+        shell.exec(startUICmd, (code, stdout, stderr) => {
+            console.log('UICmd Exit code:', code);
+        });
+    }
+}
+
+function initCmd() {
+
+}
+
+switch (command) {
+    case 'dev':
+        devCmd();
+        break;
+    case 'init':
+        initCmd();
+        break;
+    default:
+        console.log(`Incorrect command ${command}`);
+        break;
+}

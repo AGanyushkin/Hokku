@@ -1,0 +1,24 @@
+{
+  "name": "react-router",
+  "version": "1.0.0",
+  "description": "",
+  "hokku": {
+    "web": {
+      "devServer": {
+        "port": 8081
+      },
+      "main": "src/launcher.js"
+    }
+  },
+  "scripts": {
+    "start": "node ./node_modules/hokku-web/bin/kweb dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "hokku-web": "^0.13.11",
+    "react": "^16.1.1",
+    "react-router-dom": "^4.2.2"
+  }
+}

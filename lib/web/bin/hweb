@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+
+const path = require('path');
+const shell = require('shelljs');
+const argv = require('yargs').argv;
+
+const command = argv._[0];
+
+const webpackDevServerCfg = path.resolve(__dirname, 'webpack.dev.server.js');
+const webpackCfg = path.resolve(__dirname, 'webpack.config.js');
+const webpack = './node_modules/webpack/bin/webpack.js'
+
+switch (command) {
+    case 'dev':
+        shell.exec(`node ${webpackDevServerCfg}`);
+        break;
+    case 'build':
+        shell.exec(`node ${webpack} --progress --colors --config ${webpackCfg}`);
+        break;
+    default:
+        console.log(`Incorrect command ${command}`);
+        break;
+}

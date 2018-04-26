@@ -1,0 +1,351 @@
+<html>
+<head>
+    <script>
+
+        function Waiter() {
+            let promiseRes = () => {};
+            let promiseRej = () => {};
+            let waiter = new Promise(function WaiterPromiseResolver(res, rej) {
+                promiseRes = res;
+                promiseRej = rej;
+            });
+
+            waiter.ready = false;
+            waiter.error = false;
+            waiter.done = false;
+
+            waiter.resolve = function WaiterPromiseResolve() {
+                waiter.ready = true;
+                waiter.done = true;
+                promiseRes();
+            };
+            waiter.reject = function WaiterPromiseReject() {
+                waiter.error = true;
+                waiter.done = true;
+                promiseRej();
+            };
+
+            waiter.catch((er) => undefined);
+
+            return waiter;
+        }
+
+        function Hokku() {
+            const POOL_SIZE ='POOL_SIZE';
+            const MY_ID = 'MY_ID';
+            const BUFFER = 'BUFFER';
+            const BARRIER = 'BARRIER';
+            const GET_ENV = 'GET_ENV';
+            const RESULT = 'RESULT';
+            const TRANSFER = 'TRANSFER';
+            const COLLECT = 'COLLECT';
+
+            let mpiImpl = null;
+
+            const core = {
+                run(mpiScript, threads, data) {
+                    if (mpiImpl !== null) throw new Error('mpi already running');
+
+                    mpiImpl = core.getMPIImplementation(core);
+
+                    return mpiImpl.hwThreadCount()
+                        .then(hwThreads => {
+                            if (threads > 0) {
+                                return core.mpiEngineStart(mpiScript, threads, data)
+                            } else if (threads < 0) {
+                                let count = hwThreads + threads;
+                                if (count > 0) {
+                                    return core.mpiEngineStart(mpiScript, count, data)
+                                } else {
+                                    return core.mpiEngineStart(mpiScript, hwThreads, data)
+                                }
+                            }
+                            return core.mpiEngineStart(mpiScript, hwThreads, data)
+                        })
+                        .then((res) => {
+                            mpiImpl = null;
+                            return res;
+                        })
+                },
+
+                mpiEngineStart(mpiScript, threads, data) {
+                    let job = {
+                        threads: []
+                    };
+
+                    for (let thread = 0; thread < threads; thread++) {
+                        job.threads.push(
+                            mpiImpl.startThread(mpiScript, data, thread, threads)
+                        )
+                    }
+
+                    return Promise.all(job.threads)
+                },
+
+                mpiEngineLoop(state) {
+                    if (!state.step.done) {
+                        core.mpiEngineHandler(state.step.value, state)
+                            .then(stepActionResult => {
+                                state.step = state.script.next(stepActionResult);
+                                core.mpiEngineLoop(state);
+                            });
+                    } else {
+                        state.res(state.result);
+                    }
+                },
+
+                mpiEngineHandler(value, state) {
+                    let res = undefined;
+                    switch (value.type) {
+                        case POOL_SIZE:
+                            res = mpiImpl.mpiGetPoolSize.call(state);
+                            break;
+                        case MY_ID:
+                            res = mpiImpl.mpiGetMyId.call(state);
+                            break;
+                        case BUFFER:
+                            res = mpiImpl.mpiBuildBuffer.call(state, value.size);
+                            break;
+                        case BARRIER:
+                            res = mpiImpl.mpiWaitBarrier.call(state);
+                            break;
+                        case GET_ENV:
+                            res = mpiImpl.getEnv.call(state);
+                            break;
+                        case RESULT:
+                            res = mpiImpl.setResult.call(state, value.data);
+                            break;
+                        case TRANSFER:
+                            res = mpiImpl.mpiTransfer.call(state, value.data);
+                            break;
+                        case COLLECT:
+                            res = mpiImpl.mpiCollect.call(state, value.data);
+                            break;
+                        default:
+                            break;
+                    }
+                    return res;
+                },
+
+                getMPIImplementation(hokkuMpiCore) {
+                    let threads = NaN;
+                    let pool = {};
+                    let barriers = {};
+                    let transfers = {};
+                    let collect = {};
+                    const _mpiImpl = {
+                        mpiGetPoolSize() {
+                            return Promise.resolve(this.threads);
+                        },
+                        mpiGetMyId() {
+                            return Promise.resolve(this.thread);
+                        },
+                        getEnv() {
+                            return Promise.all([
+                                _mpiImpl.mpiGetPoolSize.call(this),
+                                _mpiImpl.mpiGetMyId.call(this),
+                            ])
+                                .then(list => {
+                                    return {
+                                        poolSize: list[0],
+                                        myId: list[1]
+                                    }
+                                })
+                        },
+                        mpiBuildBuffer(size) {
+                            return new Promise((res) => {
+                                let buffer = [];
+                                let i = size;
+                                while(i--) {
+                                    buffer[i] = 0
+                                }
+                                res(buffer)
+                            })
+                        },
+                        mpiWaitBarrier(_name) {
+                            let name = _name || 'default';
+                            if (!barriers[name]) {
+                                barriers[name] = [];
+                                for (let i = 0; i < threads; i++) {
+                                    barriers[name].push(new Waiter());
+                                }
+                            }
+                            barriers[name][this.thread].resolve();
+                            return Promise.all(barriers[name])
+                                .then(() => {
+                                    if (this.thread === 0) {
+                                        delete barriers[name]
+                                    }
+                                })
+                        },
+                        mpiTransfer(data) {
+                            const name = '__sys_transfer_waiter__';
+                            if (!transfers[name]) {
+                                transfers[name] = data;
+                            }
+                            let result = null;
+                            return _mpiImpl.mpiWaitBarrier.call(this, name)
+                                .then(() => {
+                                    result = JSON.parse(JSON.stringify(transfers[name]));
+                                    return _mpiImpl.mpiWaitBarrier.call(this, name)
+                                })
+                                .then(() => {
+                                    if (this.thread === 0) delete transfers[name];
+                                    return result
+                                })
+                        },
+                        mpiCollect(data) {
+                            const name = '__sys_collect_waiter__';
+                            if (!collect[name]) {
+                                collect[name] = [];
+                                for (let i = 0; i < threads; i++) {
+                                    collect[name].push(null);
+                                }
+                            }
+                            collect[name][this.thread] = data;
+
+                            let result = null;
+                            return _mpiImpl.mpiWaitBarrier.call(this, name)
+                                .then(() => {
+                                    result = collect[name];
+                                    return _mpiImpl.mpiWaitBarrier.call(this, name)
+                                })
+                                .then(() => {
+                                    if (this.thread === 0) delete collect[name];
+                                    return result
+                                })
+                        },
+                        hwThreadCount() {
+                            return new Promise((res, rej) => {
+                                res(navigator.hardwareConcurrency || 1);
+                            });
+                        },
+                        setResult(data) {
+                            return new Promise((res, rej) => {
+                                this.result = data;
+                                res();
+                            });
+                        },
+                        startThread(mpiScript, data, thread, _threads) {
+                            if (isNaN(threads)) {
+                                threads = _threads;
+                            } else {
+                                if (threads !== _threads)
+                                    throw new Error(`incorrect threads value ${_threads} / ${threads}`);
+                            }
+                            let poolItem = new Promise((res, rej) => {
+                                setTimeout(() => {
+                                    let script = mpiScript(data);
+                                    let state = {
+                                        data,
+                                        script,
+                                        step: script.next(),
+                                        res,
+                                        rej,
+                                        threads,
+                                        thread
+                                    };
+                                    hokkuMpiCore.mpiEngineLoop(state)
+                                }, 0)
+                            });
+                            pool[thread] = poolItem;
+                            return poolItem;
+                        }
+                    };
+
+                    return _mpiImpl
+                }
+            };
+
+            return {
+                mpi: {
+                    poolSize() {
+                        return { type: POOL_SIZE }
+                    },
+                    myId() {
+                        return { type: MY_ID }
+                    },
+                    getEnv() {
+                        return { type: GET_ENV }
+                    },
+                    buffer(size) {
+                        return { type: BUFFER, size }
+                    },
+                    barrier() {
+                        return { type: BARRIER }
+                    },
+                    transfer(data) {
+                        return { type: TRANSFER, data }
+                    },
+                    collect(data) {
+                        return { type: COLLECT, data }
+                    },
+                    result(data) {
+                        return { type: RESULT, data }
+                    },
+
+                    hwThreadCount() {
+                        return mpiImpl.hwThreadCount()
+                    },
+
+                    run(mpiScript, threads, data) {
+                        return core.run(mpiScript, threads, data)
+                    }
+                }
+            };
+        }
+
+        /** --------------------------------------------------------------------------------------------------------- */
+
+        const {mpi} = Hokku();
+
+        function* mpiScript(N) {
+            let myid = yield mpi.myId();
+            console.log(`${myid}: started`);
+
+            console.log(`${myid}: inputData = ${N}`);
+
+            let poolsize = yield mpi.poolSize();
+            console.log(`${myid}: poolsize = ${poolsize}`);
+
+            let {myId, poolSize} = yield mpi.getEnv();
+            console.log(`${myid}: poolsize = ${poolSize} / myId = ${myId}`);
+
+            let data;
+            if (myId === 0) {
+                data = yield mpi.buffer(N);
+                console.log(`${myid}: data = ${data}`);
+            }
+
+            yield mpi.barrier();
+            console.log(`${myid}: barrier`);
+            console.log(`${myid}: data = ${data}`);
+
+            data = yield mpi.transfer(data);
+            console.log(`${myid}: data = ${data}`);
+
+            for (let i = 0; i < N; i++) {
+                data[i] = `${myId}-${i}`;
+            }
+
+            let dataPool = yield mpi.collect(data);
+            console.log(`${myid}: dataPool = ${JSON.stringify(dataPool)}`);
+
+            if (myId === 0) {
+                yield mpi.result(dataPool);
+            }
+        }
+
+        const N = 3;
+        mpi.run(mpiScript, 3, N)
+            .then((result) => {
+                console.log('DONE with');
+                console.log(JSON.stringify(result))
+            });
+
+    </script>
+</head>
+<body>
+<h6>mpi</h6>
+</body>
+</html>

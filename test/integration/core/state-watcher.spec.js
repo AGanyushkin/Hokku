@@ -1,0 +1,33 @@
+import chai from 'chai';
+const expect = chai.expect;
+
+import Hokku from '../../../lib/core/javascript/hokku'
+
+describe('state', () => {
+
+    after(() => {
+        (global || window).hokkuSysObjectMap = {}
+    });
+
+    it('state watcher', (done) => {
+
+        const toDoSomething = Hokku.def();
+
+        const {fire, stateWatcher} = new Hokku({
+            state: 1,
+            reducer: (type, payload, state) => {
+                return 2;
+            },
+            ready() {
+                fire(toDoSomething());
+            }
+        });
+
+        stateWatcher()
+            .subscribe(state => {
+                expect(state).to.deep.equal(2);
+                done();
+            })
+
+    })
+});

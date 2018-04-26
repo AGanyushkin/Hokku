@@ -1,0 +1,31 @@
+{
+  "name": "24_test_hokku_web_builder",
+  "version": "1.0.0",
+  "description": "",
+  "hokku": {
+    "server": {
+      "main": "src/nodeLauncher.js"
+    },
+    "web": {
+      "devServer": {
+        "port": 8081
+      },
+      "main": "src/webLauncher.js"
+    }
+  },
+  "scripts": {
+    "dev": "./node_modules/hokku-web/bin/kweb dev",
+    "build": "./node_modules/hokku-web/bin/kweb build",
+    "up": "./node_modules/hokku-node/bin/knode"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "antd": "^2.13.8",
+    "antd-init": "^2.0.4",
+    "hokku-core": "^0.5.0",
+    "hokku-node": "^0.5.0",
+    "hokku-web": "^0.5.0"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "presets": [
+    "es2015",
+    "flow",
+    "react"
+  ],
+  "plugins": [
+    "transform-object-rest-spread",
+    "transform-decorators-legacy",
+    "transform-class-properties"
+  ],
+  "env": {
+    "test": {
+      "plugins": [
+        "istanbul",
+        "rewire"
+      ]
+    }
+  }
+}
