@@ -1,8 +1,11 @@
-Install all dependencies from npm repository 
-
-    # npm install
 
 # Development
+
+### Install dependencies
+
+Install all dependencies from npm repository
+
+    # npm install
 
 ### Build
 
