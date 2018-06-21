@@ -11,7 +11,9 @@ describe('def-action', () => {
 
     it('define action with payload preprocessing', (done) => {
 
-        const a1 = Hokku.def('ACTION-1', payload =>
+        const {act} = Hokku();
+
+        const a1 = act('ACTION-1', payload =>
             Object.assign({}, payload, {testF: 1})
         );
 
@@ -22,15 +24,12 @@ describe('def-action', () => {
         });
 
         hook(a1, action => {
-            expect(action).to.deep.equal(
-                {
-                    type: 'ACTION-1',
-                    payload: {
-                        someData: 9,
-                        testF: 1
-                    }
-                }
-            );
+            expect(action.type).to.deep.equal('ACTION-1');
+            expect(action.payload).to.deep.equal({
+                someData: 9,
+                testF: 1
+            });
+
             done();
         });
 

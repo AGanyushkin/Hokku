@@ -11,6 +11,8 @@ describe('hooks', () => {
 
     it('hook all rxjs handler', (done) => {
 
+        const {act} = Hokku();
+
         const state = {
             a1: false,
             a2: false
@@ -21,8 +23,8 @@ describe('hooks', () => {
             if (state.a1 && state.a2) done();
         }
 
-        const a1 = Hokku.def('a1');
-        const a2 = Hokku.def('a2');
+        const a1 = act('a1');
+        const a2 = act('a2');
 
         const {hookAll, fire} = new Hokku({
             ready() {

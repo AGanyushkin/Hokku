@@ -11,7 +11,9 @@ describe('state', () => {
 
     it('state watcher', (done) => {
 
-        const toDoSomething = Hokku.def();
+        const {act} = Hokku();
+
+        const toDoSomething = act();
 
         const {fire, stateWatcher} = new Hokku({
             state: 1,

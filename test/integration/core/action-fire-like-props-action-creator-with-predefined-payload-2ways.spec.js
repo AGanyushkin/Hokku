@@ -3,13 +3,13 @@ const expect = chai.expect;
 
 import Hokku from '../../../lib/core/javascript/hokku'
 
-describe('def-action', () => {
+describe('fire-action', () => {
 
     after(() => {
         (global || window).hokkuSysObjectMap = {}
     });
 
-    it('define action', (done) => {
+    it('action fire like props action creator with predefined payload 2ways', (done) => {
 
         const {hook, act} = Hokku();
 
@@ -17,20 +17,28 @@ describe('def-action', () => {
         const ia2 = act('ACTION-2');
 
         hook(ia1, action => {
-            ia2(123).fire();
+
+            expect(action.type).to.deep.equal('ACTION-1');
+            expect(action.payload).to.deep.equal(123);
+
+            const propsAction2 = ia2(999).fire;
+
+            propsAction2(777);
         });
 
         hook(ia2, action => {
 
             expect(action.type).to.deep.equal('ACTION-2');
-            expect(action.payload).to.deep.equal(123);
+            expect(action.payload).to.deep.equal(777);
 
             done();
         });
 
         new Hokku({
             ready() {
-                ia1().fire();
+                const propsAction1 = ia1(123).fire;
+
+                propsAction1();
             }
         })
 

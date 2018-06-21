@@ -3,13 +3,13 @@ const expect = chai.expect;
 
 import Hokku from '../../../lib/core/javascript/hokku'
 
-describe('def-action', () => {
+describe('fire-action', () => {
 
     after(() => {
         (global || window).hokkuSysObjectMap = {}
     });
 
-    it('define action', (done) => {
+    it('fire action 2 ways', (done) => {
 
         const {hook, act} = Hokku();
 
@@ -28,9 +28,9 @@ describe('def-action', () => {
             done();
         });
 
-        new Hokku({
+        const {fire} = new Hokku({
             ready() {
-                ia1().fire();
+                fire(ia1());
             }
         })
 

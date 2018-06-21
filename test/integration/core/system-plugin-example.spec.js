@@ -34,7 +34,9 @@ describe('plugin', () => {
 
         /** --- */
 
-        const a1 = NewHokku.def('ACTION_FROM_USER');
+        const {act} = NewHokku();
+
+        const a1 = act('ACTION_FROM_USER');
 
         const {hook, fire} = new NewHokku({
             ready() {

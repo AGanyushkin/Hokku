@@ -2,6 +2,7 @@ import chai from 'chai';
 const expect = chai.expect;
 
 import * as u from '../../../lib/core/javascript/util';
+import proto from "../../../lib/core/javascript/hokkuPrototype";
 
 describe('util', () => {
 
@@ -82,6 +83,7 @@ describe('util', () => {
     checkTypes(u.isFunction, [10, 11, 12, 13, 22, 23, 24, 25]);
     checkTypes(u.isNull, [4]);
     checkTypes(u.isSampleActionSet, [0, 3, 17, 18, 19, 20, 21, 27]);
+    checkTypes(u.isPayloadTransformer, [12, 13]);
 
     describe('is<env> functions check', () => {
         it('isNode should works', () => {
@@ -152,6 +154,56 @@ describe('util', () => {
             expect(u.isSameType({}, 1)).to.be.false;
             expect(u.isSameType({}, {})).to.be.true;
             expect(u.isSameType({}, undefined)).to.be.false;
+        });
+    });
+
+    describe('getActArguments should', () => {
+        it('fail with incorrect data type', () => {
+            expect(
+                () => u.getActArguments([{}])
+            ).to.throw('Incorrect action definition with type "null":object');
+
+            expect(
+                () => u.getActArguments(['test', {}])
+            ).to.throw('Incorrect action definition with type "null":object');
+
+            expect(
+                () => u.getActArguments(['test', () => {}])
+            ).to.throw('Incorrect action definition with type "null":object');
+
+            expect(
+                () => u.getActArguments(['test', (x, y, z) => {}])
+            ).to.throw('Incorrect action definition with type "null":object');
+        });
+
+        it('return default args', () => {
+            const args = u.getActArguments([]);
+
+            expect(args.type.length).to.be.equal(36);
+            expect(args.transform).to.be.a.function;
+        });
+
+        it('return args for type', () => {
+            const args = u.getActArguments(['xxx']);
+
+            expect(args.type).to.be.equal('xxx');
+            expect(args.transform).to.be.a.function;
+        });
+
+        it('return args for transform', () => {
+            const args = u.getActArguments([payload => 7]);
+
+            expect(args.type.length).to.be.equal(36);
+            expect(args.transform).to.be.a.function;
+            expect(args.transform()).to.be.equal(7);
+        });
+
+        it('return args for type and transform', () => {
+            const args = u.getActArguments(['zzz', payload => 9]);
+
+            expect(args.type).to.be.equal('zzz');
+            expect(args.transform).to.be.a.function;
+            expect(args.transform()).to.be.equal(9);
         })
     })
 });

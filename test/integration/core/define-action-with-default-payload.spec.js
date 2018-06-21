@@ -9,19 +9,21 @@ describe('def-action', () => {
         (global || window).hokkuSysObjectMap = {}
     });
 
-    it('define action', (done) => {
+    it('define action with default payload', (done) => {
 
-        const {hook, act} = Hokku();
+        const {hook, act, fire} = Hokku();
 
-        const ia1 = act('ACTION-1');
-        const ia2 = act('ACTION-2');
+        const ia1 = act('ACTION-1', payload => (payload || 777));
+        const ia2 = act('ACTION-2', payload => (payload || 888));
 
         hook(ia1, action => {
+            expect(action.type).to.deep.equal('ACTION-1');
+            expect(action.payload).to.deep.equal(777);
+
             ia2(123).fire();
         });
 
         hook(ia2, action => {
-
             expect(action.type).to.deep.equal('ACTION-2');
             expect(action.payload).to.deep.equal(123);
 
@@ -30,7 +32,7 @@ describe('def-action', () => {
 
         new Hokku({
             ready() {
-                ia1().fire();
+                fire(ia1());
             }
         })
 
