@@ -11,6 +11,8 @@ describe('hooks', () => {
 
     it('multiple hooks for action with callback', (done) => {
 
+        const {act} = Hokku();
+
         const state = {
             a1: 0
         };
@@ -20,7 +22,7 @@ describe('hooks', () => {
             if (state.a1 === 2) done();
         }
 
-        const a1 = Hokku.def('a1');
+        const a1 = act('a1');
 
         const {hook, fire} = new Hokku({
             ready() {

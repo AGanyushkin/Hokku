@@ -11,7 +11,9 @@ describe('action-switcher', () => {
 
     it('state example', (done) => {
 
-        const aAdd = Hokku.def();
+        const {act} = Hokku({});
+
+        const aAdd = act();
 
         const {hook, fire, select} = new Hokku({
             state: 1,

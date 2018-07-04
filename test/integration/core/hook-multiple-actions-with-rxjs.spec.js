@@ -11,13 +11,15 @@ describe('hooks', () => {
 
     it('hook multiple actions with rxjs', (done) => {
 
+        const {act} = Hokku();
+
         const state = {
             a1: false,
             a2: false
         };
 
-        const a1 = Hokku.def('a1');
-        const a2 = Hokku.def('a2');
+        const a1 = act('a1');
+        const a2 = act('a2');
 
         const {hook, fire} = new Hokku({
             ready() {

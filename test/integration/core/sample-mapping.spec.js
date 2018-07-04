@@ -11,10 +11,12 @@ describe('samples', () => {
 
     it('sample mapping', (done) => {
 
-        const a1 = Hokku.def('A_1');
-        const a3 = Hokku.def('A_3');
-        const a5 = Hokku.def('A_5');
-        const a6 = Hokku.def('A_6');
+        const {act} = Hokku();
+
+        const a1 = act('A_1');
+        const a3 = act('A_3');
+        const a5 = act('A_5');
+        const a6 = act('A_6');
 
         const {hook, fire, samples} = new Hokku({
             ready() {

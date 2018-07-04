@@ -11,8 +11,10 @@ describe('def-action', () => {
 
     it('define action without type', (done) => {
 
-        const a1 = Hokku.def();
-        const a2 = Hokku.def();
+        const {act} = Hokku();
+
+        const a1 = act();
+        const a2 = act();
 
         const {hook, fire} = new Hokku({
             ready: (hokku) => {

@@ -1,9 +1,11 @@
 import chai from 'chai';
 const expect = chai.expect;
+
 import sinon from 'sinon';
 
 import Rx from 'rxjs/Rx'
 import proto from '../../../lib/core/javascript/hokkuPrototype';
+import {ActionType} from '../../../lib/core/javascript/types/interface';
 
 describe('hokkuPrototype', () => {
     describe('setState', () => {
@@ -251,14 +253,16 @@ describe('hokkuPrototype', () => {
         const applySamplesSpy = sinon.spy();
 
         before(() => {
-            proto.__Rewire__('isAction', isActionStub);
             proto.__Rewire__('applyReducer', applyReducerSpy);
             proto.__Rewire__('applySamples', applySamplesSpy);
+            proto.__Rewire__('u', {
+                'isAction': isActionStub
+            });
         });
         after(() => {
-            proto.__ResetDependency__('isAction');
-            proto.__ResetDependency__('applyReducer');
+            proto.__ResetDependency__('u');
             proto.__ResetDependency__('applySamples');
+            proto.__ResetDependency__('applyReducer');
         });
         beforeEach(() => {
             isActionStub.reset();
@@ -403,48 +407,215 @@ describe('hokkuPrototype', () => {
         })
     });
 
-    describe('def', () => {
-        const defStub = sinon.stub();
+    describe('act', () => {
+        const getActArgumentsStub = sinon.stub();
+        const isObjectStub = sinon.stub();
+
+        const fakeCore = {
+            fire: sinon.stub()
+        };
 
         before(() => {
-            proto.__Rewire__('kStatic', {
-                def: defStub
+            proto.__Rewire__('u', {
+                'getActArguments': getActArgumentsStub,
+                'isObject': isObjectStub
             });
         });
         after(() => {
-            proto.__ResetDependency__('kStatic');
+            proto.__ResetDependency__('u');
         });
         beforeEach(() => {
-            defStub.reset();
+            getActArgumentsStub.reset();
+            isObjectStub.reset();
+            fakeCore.fire.reset();
         });
 
-        it('should ', () => {
-            defStub.callsFake(() => {
-                const func = function () { return 777 };
+        it('toString transformation', () => {
+            const type = 'testid';
 
-                func.is = 123;
-                func.toString = 999;
-                return func
-            });
+            getActArgumentsStub.callsFake(args => ({
+                type, transform: payload => payload
+            }));
 
-            const fakeHokku = {
-                fire: sinon.spy()
+            const actionCreator = proto.act.call(fakeCore, type);
+
+            expect(actionCreator.toString).to.be.a.function;
+            expect(actionCreator.toString()).to.be.equal(type);
+            expect(`${actionCreator}`).to.be.equal(type);
+        });
+
+        it('simple action creator', () => {
+            const type = 'testid';
+
+            getActArgumentsStub.callsFake(args => ({
+                type, transform: payload => payload
+            }));
+
+            const actionCreator = proto.act.call(fakeCore);
+
+            expect(actionCreator).to.be.a.function;
+            expect(actionCreator.length).to.be.equal(0); // function has optional arguments only
+            expect(actionCreator.is).to.be.a.function;
+            expect(actionCreator.is(type)).to.be.true;
+            expect(actionCreator.is('test')).to.be.false;
+            expect(actionCreator.fire).to.be.a.function;
+            expect(actionCreator.fire.length).to.be.equal(2);
+            expect(`${actionCreator}`).to.be.equal(type);
+
+            const action = actionCreator('data');
+
+            expect(action.type).to.be.equal(type);
+            expect(action.payload).to.be.equal('data');
+            expect(action.fire).to.be.a.function;
+            expect(action.opts).to.be.a.function;
+            expect(action.response).to.be.a.function;
+
+            expect(fakeCore.fire.callCount).to.be.equal(0);
+            expect(getActArgumentsStub.callCount).to.be.equal(1);
+        });
+
+        describe('fire through action fire method', () => {
+            const tests = [
+                {
+                    inAction: { type: 'test_undefined', data: undefined },
+                    outAction: { type: 'test_undefined', data: undefined },
+                    firedData: undefined,
+                    isObject: false
+                },
+                {
+                    inAction: { type: 'test_x0', data: undefined },
+                    outAction: { type: 'test_x0', data: 7 },
+                    firedData: 7,
+                    isObject: false
+                },
+                {
+                    inAction: { type: 'test_x1', data: undefined },
+                    outAction: { type: 'test_x1', data: {x: 1} },
+                    firedData: {x: 1},
+                    isObject: false
+                },
+                {
+                    inAction: { type: 'test_x', data: 'DATA' },
+                    outAction: { type: 'test_x', data: 'DATA' },
+                    firedData: undefined,
+                    isObject: false
+                },
+                {
+                    inAction: { type: 'test_y', data: {f: 1} },
+                    outAction: { type: 'test_y', data: 'DATA' },
+                    firedData: 'DATA',
+                    isObject: false
+                },
+                {
+                    inAction: { type: 'test_z', data: 'DATA' },
+                    outAction: { type: 'test_z', data: {f: 1} },
+                    firedData: {f: 1},
+                    isObject: false
+                },
+                {
+                    inAction: { type: 'test_g', data: {f: 1} },
+                    outAction: { type: 'test_g', data: {f: 2} },
+                    firedData: {f: 2},
+                    isObject: true
+                },
+                {
+                    inAction: { type: 'test_k', data: {f: 1} },
+                    outAction: { type: 'test_k', data: {f: 1, v: 2} },
+                    firedData: {v: 2},
+                    isObject: true
+                }
+            ];
+
+            tests.forEach(item => {
+                const _in = JSON.stringify(item.inAction.data);
+                const _fired = JSON.stringify(item.firedData);
+                const _out = JSON.stringify(item.outAction.data);
+
+                it(`with data: in=${_in}, fData=${_fired}, out=${_out}`, () => {
+                    getActArgumentsStub.callsFake(args => ({
+                        type: item.inAction.type, transform: payload => payload
+                    }));
+                    fakeCore.fire.callsFake(() => Promise.resolve());
+                    isObjectStub.callsFake(() => item.isObject);
+
+                    const actionCreator = proto.act.call(fakeCore);
+                    const action = actionCreator(item.inAction.data);
+                    const res = action.fire(item.firedData);
+
+                    expect(res).to.be.a('Promise');
+
+                    expect(getActArgumentsStub.callCount).to.be.equal(1);
+                    expect(fakeCore.fire.callCount).to.be.equal(1);
+
+                    const firedAction = fakeCore.fire.getCall(0).args[0];
+
+                    expect(firedAction).to.deep.equal(action);
+                    expect(firedAction.type).to.be.equal(item.outAction.type);
+                    expect(firedAction.payload).to.deep.equal(item.outAction.data);
+                });
+            })
+        });
+
+        it('fire through action-creator fire method', () => {
+            const type = 'test_y';
+            const data = 'DATA';
+
+            getActArgumentsStub.callsFake(args => ({
+                type, transform: payload => payload
+            }));
+            fakeCore.fire.callsFake(() => Promise.resolve());
+            isObjectStub.callsFake(() => false);
+
+            const actionCreator = proto.act.call(fakeCore);
+            const res = actionCreator.fire(data);
+
+            expect(res).to.be.a('Promise');
+
+            expect(getActArgumentsStub.callCount).to.be.equal(1);
+            expect(fakeCore.fire.callCount).to.be.equal(1);
+
+            const firedAction = fakeCore.fire.getCall(0).args[0];
+
+            expect(firedAction.type).to.be.equal(type);
+            expect(firedAction.payload).to.deep.equal(data);
+        });
+
+        it('fire with options', () => {
+            const responseActionStub = sinon.stub();
+
+            const type = 'test_q';
+            const payload = 'DATA';
+            const opts = {
+                visible: {arg: 1, type: 'fail-if-will-be-allied'},
+                invisible: {harg: 2},
+                responseFunc: () => responseActionStub()
             };
 
-            const res = proto.def.call(fakeHokku, 'TEST_TYPE');
+            getActArgumentsStub.callsFake(args => ({
+                type, transform: payload => payload
+            }));
+            fakeCore.fire.callsFake(() => Promise.resolve());
+            isObjectStub.callsFake(val => Object.prototype.toString.call(val) === '[object Object]');
 
-            expect(defStub.callCount).to.be.equal(1);
-            expect(defStub.getCall(0).args[0]).to.be.equal('TEST_TYPE');
-            expect(res).to.be.a('function');
-            expect(res.is).to.be.equal(123);
-            expect(res.toString).to.be.equal(999);
-            expect(fakeHokku.fire.callCount).to.be.equal(0);
+            const actionCreator = proto.act.call(fakeCore);
+            const res = actionCreator.fire(payload, opts);
 
-            const testRes = res('test_payload');
+            expect(res).to.be.a('Promise');
 
-            expect(fakeHokku.fire.callCount).to.be.equal(1);
-            expect(fakeHokku.fire.getCall(0).args[0]).to.deep.equal(777);
-            expect(testRes).to.be.undefined;
+            expect(getActArgumentsStub.callCount).to.be.equal(1);
+            expect(fakeCore.fire.callCount).to.be.equal(1);
+
+            const firedAction = fakeCore.fire.getCall(0).args[0];
+
+            expect(firedAction.type).to.be.equal(type);
+            expect(firedAction.payload).to.be.equal(payload);
+            expect(firedAction.arg).to.be.equal(1);
+            expect(firedAction.opts()).to.deep.equal({
+                harg: 2
+            });
+
+            firedAction.response();
+            expect(responseActionStub.callCount).to.be.equal(1);
         })
     });
 
