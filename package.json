@@ -1,7 +1,7 @@
 {
   "name": "hokku",
-  "version": "0.0.1",
-  "description": "Event based environment",
+  "version": "0.0.5",
+  "description": "Event-Based Development Environment",
   "main": "index.js",
   "dependencies": {
     "cli-table": "^0.3.1",
