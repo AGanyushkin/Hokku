@@ -1,6 +1,6 @@
 {
   "name": "hokku",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Event-Based Development Environment",
   "main": "index.js",
   "dependencies": {
