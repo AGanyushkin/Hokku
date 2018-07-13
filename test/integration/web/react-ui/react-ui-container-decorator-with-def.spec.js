@@ -5,12 +5,22 @@ import chaiDom from 'chai-dom';
 chai.use(chaiDom);
 chai.should();
 
+/**
+ * 123898 jhgkdfjhg
+ * dfjgl jsd;fg
+ * sdfgkl; j
+ */
 describe('react-ui-container-decorator-with-def', () => {
 
     after(() => {
         (global || window).hokkuSysObjectMap = {}
     });
 
+
+    /**
+     * test
+     * message
+     */
     it('should works', (done) => {
 
         const {hook, fire} = new Hokku({

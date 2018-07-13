@@ -4,6 +4,8 @@
   "description": "Event-Based Development Environment",
   "main": "index.js",
   "dependencies": {
+    "@babel/generator": "^7.0.0-beta.52",
+    "@babel/parser": "^7.0.0-beta.52",
     "cli-table": "^0.3.1",
     "koa": "^2.3.0",
     "koa-bodyparser": "^4.2.0",
@@ -82,7 +84,10 @@
   "scripts": {
     "check": "npm run build && npm run test && npm run integration",
     "deploy:npm": "node ./scripts/deployNPMVersion.js",
-    "build": "npm run core:build && npm run node:build && npm run web:build",
+    "build": "npm run core:build && npm run node:build && npm run web:build && npm run docs:build",
+    "docs:build": "mkdir -p ./build/docs && npm run docs:build:common && npm run docs:build:examples",
+    "docs:build:common": "cp -rf ./docs/* ./build/docs/",
+    "docs:build:examples": "node ./scripts/buildDocsExamples.js",
     "test": "npm run core:test",
     "integration": "npm run core:integration && npm run node:integration && npm run web:integration",
     "core:build": "npm run core:build:sources && npm run core:build:package",

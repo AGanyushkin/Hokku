@@ -1,0 +1,33 @@
+{
+  "type": "ImportDeclaration",
+  "specifiers": [
+    {
+      "type": "ImportDefaultSpecifier",
+      "local": {
+        "type": "Identifier",
+        "name": "React"
+      }
+    },
+    {
+      "type": "ImportSpecifier",
+      "imported": {
+        "type": "Identifier",
+        "name": "Component"
+      },
+      "importKind": null,
+      "local": {
+        "type": "Identifier",
+        "name": "Component"
+      }
+    }
+  ],
+  "importKind": "value",
+  "source": {
+    "type": "StringLiteral",
+    "extra": {
+      "rawValue": "react",
+      "raw": "\"react\""
+    },
+    "value": "react"
+  }
+}

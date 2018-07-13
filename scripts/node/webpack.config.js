@@ -2,10 +2,11 @@ const path = require('path');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+const BUILD_DST = 'build/dist';
 const PROJECT_ROOT = path.resolve(__dirname, '../../');
 const NODE_ROOT = path.resolve(PROJECT_ROOT, 'lib/node/');
 const LAUNCHER_JS = path.resolve(NODE_ROOT, 'javascript/hokku.js');
-const BUILD_PATH = path.resolve(PROJECT_ROOT, 'build/node');
+const BUILD_PATH = path.resolve(PROJECT_ROOT, `${BUILD_DST}/node`);
 
 const config = require('../webpack.config');
 

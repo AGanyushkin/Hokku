@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 
+const BUILD_DST = '../build/dist/';
 const appMod = process.argv[2];
 
 if (appMod && ['core', 'node', 'web'].includes(appMod)) {
@@ -17,7 +18,7 @@ if (appMod && ['core', 'node', 'web'].includes(appMod)) {
         null, 4
     );
 
-    fs.writeFileSync(path.resolve(__dirname, `../build/${appMod}/package.json`), resCfg);
+    fs.writeFileSync(path.resolve(__dirname, `${BUILD_DST}${appMod}/package.json`), resCfg);
 
     // todo, need to sync/push lock file for dependencies described in package.json file.
 
