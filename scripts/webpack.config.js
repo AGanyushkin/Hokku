@@ -13,6 +13,14 @@ const plugins = [
 
 const rules = [
     {
+        enforce: 'pre',
+        test: /(\.jsx|\.js)$/,
+        exclude: /node_modules/,
+        use: {
+            loader: 'eslint-loader'
+        }
+    },
+    {
         test: /(\.jsx|\.js)$/,
         exclude: /node_modules/,
         use: {
@@ -20,16 +28,6 @@ const rules = [
         }
     }
 ];
-
-/**
- * {
-        test: /(\.jsx|\.js)$/,
-        exclude: /node_modules/,
-        use: {
-            loader: 'eslint-loader'
-        }
-    }
- */
 
 const configuration = {
     entry: '',
