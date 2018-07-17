@@ -25,7 +25,7 @@ module.exports = function (config) {
         singleRun: true,
         logLevel: config.LOG_DEBUG,
         captureConsole: true,
-        browsers: ['Chrome', 'Firefox'], // 'Edge'
+        browsers: ['ChromeHeadless'], // 'Edge', 'Chrome', 'Firefox'
         files: [
             {pattern: SOURCE_FILES, watched: false},
             {pattern: TEST_FILES, watched: false}

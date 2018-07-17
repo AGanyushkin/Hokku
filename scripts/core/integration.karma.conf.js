@@ -14,7 +14,7 @@ module.exports = function (config) {
         autoWatch: false,
         singleRun: true,
         logLevel: config.LOG_INFO,
-        browsers: ['Chrome', 'Firefox'], // 'Edge'
+        browsers: ['ChromeHeadless'], // 'Edge', 'Chrome', 'Firefox'
         files: [
             {pattern: TEST_FILES, watched: false}
         ],

@@ -15,7 +15,10 @@ const rules = [
     {
         enforce: 'pre',
         test: /(\.jsx|\.js)$/,
-        exclude: /node_modules/,
+        exclude: [
+            /node_modules/,
+            /(\.spec\.js)$/
+        ],
         use: {
             loader: 'eslint-loader'
         }

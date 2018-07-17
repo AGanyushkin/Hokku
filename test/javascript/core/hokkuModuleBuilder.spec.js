@@ -311,13 +311,11 @@ describe('hokkuModuleBuilder', () => {
 
     describe('injectStatic', () => {
         const ACTIONS_PH = Math.random();
-        const SWITCHER_PH = Math.random();
 
         before(() => {
             mod.default.__Rewire__('ACTIONS', ACTIONS_PH);
             mod.default.__Rewire__('HokkuPrototype', {protoCheck: () => null});
             mod.default.__Rewire__('kStatic', {
-                switcher: SWITCHER_PH
             });
         });
 
@@ -333,7 +331,6 @@ describe('hokkuModuleBuilder', () => {
             testObject = mod.injectStatic(testObject);
 
             expect(testObject.ACTIONS).to.equal(ACTIONS_PH);
-            expect(testObject.switcher).to.equal(SWITCHER_PH);
             expect(testObject.prototype.protoCheck).to.be.instanceof(Function);
         })
     });
