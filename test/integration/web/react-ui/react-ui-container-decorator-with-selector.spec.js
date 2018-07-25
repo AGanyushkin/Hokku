@@ -1,5 +1,5 @@
-import React from 'react';
-import Hokku from '../../../../lib/web/javascript/hokku';
+import React, {Component} from 'react';
+import Hokku, {ReactRoot, ReactContainer} from '../../../../lib/web/javascript/hokku';
 import chai from 'chai';
 import chaiDom from 'chai-dom';
 chai.use(chaiDom);
@@ -32,13 +32,13 @@ describe('react-ui-container-decorator-with-selector', () => {
             done();
         });
 
-        @Hokku.React.Root
-        @Hokku.React.Container(state => ({
+        @ReactRoot
+        @ReactContainer(state => ({
             x: 1,
             y: 2,
             z: 3
         }))
-        class ValueCheck extends React.Component {
+        class ValueCheck extends Component {
             render() {
                 return (
                     <div>

@@ -84,7 +84,7 @@
   },
   "scripts": {
     "build": "npm run core:build && npm run node:build && npm run web:build && npm run docs:build",
-    "test": "npm run core:test && npm run core:integration",
+    "test": "npm run core:test && npm run core:integration && npm run node:integration",
     "docs:build": "npm run docs:build:examples && npm run docs:build:common",
     "docs:build:common": "cp -rf ./docs/* ./build/docs/",
     "docs:build:examples": "node ./scripts/buildDocsExamples.js",
@@ -120,15 +120,8 @@
     "web:integration": "cross-env PLATFORM_ENV=browser NODE_ENV=test karma start ./scripts/web/integration.karma.conf.js",
     "web:flow": "cd lib/web/ && flow",
     "web:show:allure": "node ./node_modules/allure-commandline/bin/allure serve ./reports/allure/web/",
-    "mock:init": "npm run mock:init:docker",
-    "mock:deinit": "npm run mock:deinit:docker",
-    "mock:start": "npm run mock:start:docker && npm run mock:start:mock-server",
-    "mock:stop": "npm run mock:stop:docker",
-    "mock:init:docker": "docker run --name hokku_integration_rdb -p 8080:8080 -p 28015:28015 -p 29015:29015  -d rethinkdb:2.3.6",
-    "mock:deinit:docker": "docker rm hokku_integration_rdb",
-    "mock:start:mock-server": "node ./test/integration/web/mock-server.js",
-    "mock:start:docker": "docker start hokku_integration_rdb",
-    "mock:stop:docker": "docker stop hokku_integration_rdb"
+
+    "mock_server": "node ./test/integration/web/mock-server.js"
   },
   "repository": {
     "type": "git",

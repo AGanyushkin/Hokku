@@ -14,7 +14,13 @@ module.exports = function (config) {
         autoWatch: false,
         singleRun: true,
         logLevel: config.LOG_INFO,
-        browsers: ['Chrome', 'Firefox'], // 'Edge'
+        browsers: ['ChromeHeadlessNoSandbox'], // 'ChromeHeadless', 'Edge', 'Chrome', 'Firefox'
+        customLaunchers: {
+            ChromeHeadlessNoSandbox: {
+                base: 'ChromeHeadless',
+                flags: ['--no-sandbox']
+            }
+        },
         files: [
             {pattern: TEST_FILES, watched: false}
         ],

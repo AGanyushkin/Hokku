@@ -1,5 +1,5 @@
-import React from 'react';
-import Hokku from '../../../../lib/web/javascript/hokku';
+import React, {Component} from 'react';
+import Hokku, {ReactRoot, ReactContainer, Switcher} from '../../../../lib/web/javascript/hokku';
 import chai from 'chai';
 import chaiDom from 'chai-dom';
 chai.use(chaiDom);
@@ -28,16 +28,16 @@ describe('react-ui-container-decorator-counter-with-def-swithcer', () => {
             done();
         });
 
-        @Hokku.React.Root
-        @Hokku.React.Container(
+        @ReactRoot
+        @ReactContainer(
             {
                 count: 0
             },
-            Hokku.switcher({
+            Switcher({
                 'INC': (payload, state) => ({count: state.count + 1})
             })
         )
-        class Counter extends React.Component {
+        class Counter extends Component {
             render() {
                 return (
                     <div>
