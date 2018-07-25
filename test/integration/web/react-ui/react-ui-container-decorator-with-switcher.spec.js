@@ -1,5 +1,5 @@
-import React from 'react';
-import Hokku from '../../../../lib/web/javascript/hokku';
+import React, {Component} from 'react';
+import Hokku, {ReactRoot, ReactContainer, Switcher} from '../../../../lib/web/javascript/hokku';
 import chai from 'chai';
 import chaiDom from 'chai-dom';
 chai.use(chaiDom);
@@ -28,16 +28,16 @@ describe('react-ui-container-decorator-with-switcher', () => {
             done();
         });
 
-        @Hokku.React.Root
-        @Hokku.React.Container(
+        @ReactRoot
+        @ReactContainer(
             null,
-            Hokku.switcher({
+            Switcher({
                 'A_1': (payload, state) => {
                     return {switcher: 123}; // todo, fail if {switcher: true}, why?
                 }
             })
         )
-        class ValueCheck extends React.Component {
+        class ValueCheck extends Component {
             render() {
                 return (
                     <div>

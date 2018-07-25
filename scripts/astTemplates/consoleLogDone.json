@@ -1,0 +1,28 @@
+{
+  "type": "ExpressionStatement",
+  "expression": {
+    "type": "CallExpression",
+    "callee": {
+      "type": "MemberExpression",
+      "object": {
+        "type": "Identifier",
+        "name": "console"
+      },
+      "property": {
+        "type": "Identifier",
+        "name": "log"
+      },
+      "computed": false
+    },
+    "arguments": [
+      {
+        "type": "StringLiteral",
+        "extra": {
+          "rawValue": "DONE",
+          "raw": "'DONE'"
+        },
+        "value": "DONE"
+      }
+    ]
+  }
+}

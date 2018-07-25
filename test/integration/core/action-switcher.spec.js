@@ -1,7 +1,7 @@
 import chai from 'chai';
 const expect = chai.expect;
 
-import Hokku from '../../../lib/core/javascript/hokku'
+import Hokku, {Switcher} from '../../../lib/core/javascript/hokku'
 
 describe('action-switcher', () => {
 
@@ -17,7 +17,7 @@ describe('action-switcher', () => {
 
         const {hook, fire, select} = new Hokku({
             state: 1,
-            reducer: Hokku.switcher({
+            reducer: Switcher({
                 [aAdd]: (payload, state) => payload + state
             }),
 

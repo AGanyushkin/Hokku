@@ -1,0 +1,21 @@
+{
+  "type": "ImportDeclaration",
+  "specifiers": [
+    {
+      "type": "ImportDefaultSpecifier",
+      "local": {
+        "type": "Identifier",
+        "name": "Hokku"
+      }
+    }
+  ],
+  "importKind": "value",
+  "source": {
+    "type": "StringLiteral",
+    "extra": {
+      "rawValue": "hokku-core",
+      "raw": "'hokku-core'"
+    },
+    "value": "hokku-core"
+  }
+}

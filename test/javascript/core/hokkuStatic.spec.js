@@ -1,20 +1,20 @@
 import chai from 'chai';
 const expect = chai.expect;
 
-import {switcher} from '../../../lib/core/javascript/hokkuStatic';
+import {Switcher} from '../../../lib/core/javascript/hokkuStatic';
 
 describe('hokkuStatic', () => {
 
     describe('"switcher" method', () => {
         it('should build reducer like handler', () => {
-            const result = switcher({});
+            const result = Switcher({});
 
             expect(result).to.be.a.function;
             expect(result.length).to.be.equal(3);
         });
 
         it('should skip processing if there is not any handlers', () => {
-            const reducer = switcher({
+            const reducer = Switcher({
                 'A1': () => 1
             });
             const state = {
@@ -26,7 +26,7 @@ describe('hokkuStatic', () => {
         });
 
         it('should skip processing if handler is not a function', () => {
-            const reducer = switcher({
+            const reducer = Switcher({
                 'A1': 'invalid handler'
             });
             const state = {
@@ -38,7 +38,7 @@ describe('hokkuStatic', () => {
         });
 
         it('should handler action', () => {
-            const reducer = switcher({
+            const reducer = Switcher({
                 'A1': () => 2
             });
             const state = {

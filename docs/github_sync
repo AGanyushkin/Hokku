@@ -1,3 +1,0 @@
-git remote add github https://AGanyushkin:$(GITHUB.ACCESS.TOKEN)@github.com/AGanyushkin/hokku.git
-git checkout -b develop 2>&1 | Write-Host
-git push github develop  2>&1 | Write-Host

@@ -1,5 +1,5 @@
-import React from 'react';
-import Hokku from '../../../../lib/web/javascript/hokku';
+import React, {Component} from 'react';
+import Hokku, {ReactRoot} from '../../../../lib/web/javascript/hokku';
 import chai from 'chai';
 import chaiDom from 'chai-dom';
 chai.use(chaiDom);
@@ -28,15 +28,15 @@ describe('react-ui-with-double-root-decorator', () => {
             done();
         });
 
-        @Hokku.React.Root
-        class Welcome1 extends React.Component {
+        @ReactRoot
+        class Welcome1 extends Component {
             render() {
                 return <div id="xyz1">check_1</div>
             }
         }
 
-        @Hokku.React.Root
-        class Welcome2 extends React.Component {
+        @ReactRoot
+        class Welcome2 extends Component {
             render() {
                 return <div id="xyz2">check_2</div>
             }
